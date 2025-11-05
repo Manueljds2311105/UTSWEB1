@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Toko Buku Online</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-brand">Toko Buku Online</h1>
+            <div class="nav-user">
+                <span id="userGreeting"></span>
+                <a href="login.html" class="btn btn-logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="dashboard-header">
+            <h1 id="greeting"></h1>
+            <p>Selamat datang di sistem manajemen toko buku</p>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="dashboard-card">
+                <div class="card-icon">📚</div>
+                <h3>Informasi Stok/Katalog</h3>
+                <p>Lihat dan kelola katalog buku yang tersedia</p>
+                <a href="stok.html" class="btn btn-primary">Buka Katalog</a>
+            </div>
+
+            <div class="dashboard-card">
+                <div class="card-icon">🛒</div>
+                <h3>Pemesanan</h3>
+                <p>Buat pesanan buku baru</p>
+                <a href="checkout.html" class="btn btn-primary">Pesan Sekarang</a>
+            </div>
+
+            <div class="dashboard-card">
+              <div class="card-icon">🚚</div>
+              <h3>Tracking Pengiriman</h3>
+              <p>Lacak status pengiriman pesanan Anda</p>
+              <a href="tracking.html" class="btn btn-primary">Lacak Paket</a>
+            </div>
+
+            <div class="dashboard-card">
+                <div class="card-icon">📊</div>
+                <h3>History Transaksi</h3>
+                <p>Lihat riwayat transaksi Anda</p>
+                <a href="#" class="btn btn-primary" onclick="alert('Fitur dalam pengembangan'); return false;">Lihat History</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script>
+        // Cek login
+        const currentUser = localStorage.getItem('currentUser');
+        if (!currentUser) {
+            window.location.href = 'login.html';
+        } else {
+            const user = JSON.parse(currentUser);
+            document.getElementById('userGreeting').textContent = user.nama;
+        }
+
+        // Greeting berdasarkan waktu
+        function setGreeting() {
+            const now = new Date();
+            const hour = now.getHours();
+            let greeting = '';
+            
+            if (hour >= 5 && hour < 11) {
+                greeting = 'Selamat Pagi';
+            } else if (hour >= 11 && hour < 15) {
+                greeting = 'Selamat Siang';
+            } else if (hour >= 15 && hour < 18) {
+                greeting = 'Selamat Sore';
+            } else {
+                greeting = 'Selamat Malam';
+            }
+            
+            document.getElementById('greeting').textContent = greeting + ', ' + JSON.parse(currentUser).nama + '!';
+        }
+        
+        setGreeting();
+    </script>
+</body>
+</html>

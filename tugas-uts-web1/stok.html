@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Katalog Buku - Toko Buku Online</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-brand">Toko Buku Online</h1>
+            <div class="nav-user">
+                <a href="dashboard.html" class="btn btn-secondary">Dashboard</a>
+                <a href="login.html" class="btn btn-logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Katalog Buku</h1>
+            <button id="tambahBukuBtn" class="btn btn-primary">+ Tambah Buku Baru</button>
+        </div>
+
+        <div id="katalogContainer" class="katalog-grid"></div>
+
+        <!-- Modal Tambah Buku -->
+        <div id="tambahBukuModal" class="modal">
+            <div class="modal-content">
+                <span class="close" data-modal="tambahBukuModal">&times;</span>
+                <h2>Tambah Buku Baru</h2>
+                <form id="tambahBukuForm">
+                    <div class="form-group">
+                        <label for="kodeBarang">Kode Barang</label>
+                        <input type="text" id="kodeBarang" required placeholder="Contoh: ASIP4301">
+                    </div>
+                    <div class="form-group">
+                        <label for="namaBarang">Nama Buku</label>
+                        <input type="text" id="namaBarang" required placeholder="Nama buku">
+                    </div>
+                    <div class="form-group">
+                        <label for="jenisBarang">Jenis Barang</label>
+                        <input type="text" id="jenisBarang" required placeholder="Contoh: Buku Ajar">
+                    </div>
+                    <div class="form-group">
+                        <label for="edisi">Edisi</label>
+                        <input type="text" id="edisi" required placeholder="Contoh: 1">
+                    </div>
+                    <div class="form-group">
+                        <label for="stok">Stok</label>
+                        <input type="number" id="stok" required placeholder="Jumlah stok">
+                    </div>
+                    <div class="form-group">
+                        <label for="harga">Harga</label>
+                        <input type="text" id="harga" required placeholder="Contoh: Rp 150.000">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script>
+        // Cek login
+        if (!localStorage.getItem('currentUser')) {
+            window.location.href = 'login.html';
+        }
+
+        // Load katalog dari data.js
+        function loadKatalog() {
+            const container = document.getElementById('katalogContainer');
+            container.innerHTML = '';
+            
+            dataKatalogBuku.forEach((buku, index) => {
+                const bukuCard = document.createElement('div');
+                bukuCard.className = 'buku-card';
+                bukuCard.innerHTML = `
+                    <div class="buku-cover">
+                        <img src="${buku.cover}" alt="${buku.namaBarang}" onerror="this.src='img/placeholder.jpg'">
+                    </div>
+                    <div class="buku-info">
+                        <h3>${buku.namaBarang}</h3>
+                        <p class="buku-kode">Kode: ${buku.kodeBarang}</p>
+                        <p class="buku-jenis">${buku.jenisBarang} - Edisi ${buku.edisi}</p>
+                        <p class="buku-stok">Stok: <strong>${buku.stok}</strong></p>
+                        <p class="buku-harga">${buku.harga}</p>
+                        <button class="btn btn-primary btn-sm" onclick="tambahKeKeranjang(${index})">Tambah ke Keranjang</button>
+                    </div>
+                `;
+                container.appendChild(bukuCard);
+            });
+        }
+
+        // Tambah ke keranjang
+        function tambahKeKeranjang(index) {
+            let keranjang = JSON.parse(localStorage.getItem('keranjang') || '[]');
+            const buku = dataKatalogBuku[index];
+            
+            const existing = keranjang.find(item => item.kodeBarang === buku.kodeBarang);
+            if (existing) {
+                existing.jumlah++;
+            } else {
+                keranjang.push({...buku, jumlah: 1});
+            }
+            
+            localStorage.setItem('keranjang', JSON.stringify(keranjang));
+            alert('Buku berhasil ditambahkan ke keranjang!');
+        }
+
+        // Modal tambah buku
+        const tambahBukuBtn = document.getElementById('tambahBukuBtn');
+        const tambahBukuModal = document.getElementById('tambahBukuModal');
+        const tambahBukuForm = document.getElementById('tambahBukuForm');
+
+        tambahBukuBtn.onclick = () => {
+            tambahBukuModal.style.display = 'block';
+        };
+
+        tambahBukuForm.onsubmit = (e) => {
+            e.preventDefault();
+            
+            const newBuku = {
+                kodeBarang: document.getElementById('kodeBarang').value,
+                namaBarang: document.getElementById('namaBarang').value,
+                jenisBarang: document.getElementById('jenisBarang').value,
+                edisi: document.getElementById('edisi').value,
+                stok: parseInt(document.getElementById('stok').value),
+                harga: document.getElementById('harga').value,
+                cover: 'img/placeholder.jpg'
+            };
+            
+            dataKatalogBuku.push(newBuku);
+            loadKatalog();
+            tambahBukuModal.style.display = 'none';
+            tambahBukuForm.reset();
+            alert('Buku baru berhasil ditambahkan!');
+        };
+
+        // Close modal
+        document.querySelectorAll('.close').forEach(closeBtn => {
+            closeBtn.onclick = function() {
+                const modalId = this.getAttribute('data-modal');
+                document.getElementById(modalId).style.display = 'none';
+            };
+        });
+
+        window.onclick = (e) => {
+            if (e.target.classList.contains('modal')) {
+                e.target.style.display = 'none';
+            }
+        };
+
+        loadKatalog();
+    </script>
+</body>
+</html>

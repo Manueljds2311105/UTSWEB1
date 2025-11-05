@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracking Pengiriman - Toko Buku Online</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-brand">Toko Buku Online</h1>
+            <div class="nav-user">
+                <a href="dashboard.html" class="btn btn-secondary">Dashboard</a>
+                <a href="login.html" class="btn btn-logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Tracking Pengiriman</h1>
+        
+        <div class="tracking-search">
+            <form id="trackingForm">
+                <div class="form-group-inline">
+                    <input type="text" id="nomorDO" placeholder="Masukkan Nomor Delivery Order / Pesanan" required>
+                    <button type="submit" class="btn btn-primary">Cari</button>
+                </div>
+                <p class="hint">Contoh nomor DO: 20230012, 20230013</p>
+            </form>
+        </div>
+
+        <div id="trackingResult" class="tracking-result" style="display: none;">
+            <div class="result-header">
+                <h2>Informasi Pengiriman</h2>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Nomor DO:</label>
+                    <span id="resultNomorDO"></span>
+                </div>
+                <div class="info-item">
+                    <label>Nama Pemesan:</label>
+                    <span id="resultNama"></span>
+                </div>
+                <div class="info-item">
+                    <label>Ekspedisi:</label>
+                    <span id="resultEkspedisi"></span>
+                </div>
+                <div class="info-item">
+                    <label>Tanggal Kirim:</label>
+                    <span id="resultTanggal"></span>
+                </div>
+                <div class="info-item">
+                    <label>Kode Paket:</label>
+                    <span id="resultPaket"></span>
+                </div>
+                <div class="info-item">
+                    <label>Total Pembayaran:</label>
+                    <span id="resultTotal"></span>
+                </div>
+            </div>
+
+            <div class="status-section">
+                <h3>Status Pengiriman</h3>
+                <div id="statusBar" class="status-bar"></div>
+            </div>
+
+            <div class="perjalanan-section">
+                <h3>Riwayat Perjalanan</h3>
+                <div id="perjalananList" class="perjalanan-list"></div>
+            </div>
+        </div>
+
+        <div id="notFound" class="alert alert-error" style="display: none;">
+            <strong>Tidak Ditemukan!</strong> Nomor Delivery Order tidak ditemukan dalam sistem.
+        </div>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script>
+        // Cek login
+        if (!localStorage.getItem('currentUser')) {
+            window.location.href = 'login.html';
+        }
+
+        document.getElementById('trackingForm').onsubmit = (e) => {
+            e.preventDefault();
+            
+            const nomorDO = document.getElementById('nomorDO').value.trim();
+            let data = dataTracking[nomorDO];
+
+            // Cek juga di pesanan baru (localStorage)
+            if (!data) {
+                const daftarPesanan = JSON.parse(localStorage.getItem('daftarPesanan') || '[]');
+                const pesanan = daftarPesanan.find(p => p.nomorPesanan === nomorDO);
+                
+                if (pesanan) {
+                    // Format data pesanan ke format tracking
+                    data = {
+                        nomorDO: pesanan.nomorPesanan,
+                        nama: pesanan.namaPemesan,
+                        status: "Dalam Proses",
+                        ekspedisi: pesanan.ekspedisi,
+                        tanggalKirim: new Date(pesanan.tanggal).toISOString().split('T')[0],
+                        paket: pesanan.nomorPesanan,
+                        total: 'Rp ' + pesanan.total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."),
+                        perjalanan: [
+                            {
+                                waktu: pesanan.tanggal,
+                                keterangan: "Pesanan berhasil dibuat. Menunggu konfirmasi pembayaran."
+                            },
+                            {
+                                waktu: pesanan.tanggal,
+                                keterangan: "Pesanan akan diproses setelah pembayaran dikonfirmasi."
+                            }
+                        ]
+                    };
+                }
+            }
+
+            const resultDiv = document.getElementById('trackingResult');
+            const notFoundDiv = document.getElementById('notFound');
+
+            if (data) {
+                // Tampilkan hasil
+                document.getElementById('resultNomorDO').textContent = data.nomorDO;
+                document.getElementById('resultNama').textContent = data.nama;
+                document.getElementById('resultEkspedisi').textContent = data.ekspedisi;
+                document.getElementById('resultTanggal').textContent = data.tanggalKirim;
+                document.getElementById('resultPaket').textContent = data.paket;
+                document.getElementById('resultTotal').textContent = data.total;
+
+                // Status bar
+                const statusBar = document.getElementById('statusBar');
+                let statusClass = '';
+                let statusText = data.status;
+                
+                if (data.status === 'Dikirim') {
+                    statusClass = 'status-delivered';
+                    statusText = '✓ Paket Telah Diterima';
+                } else if (data.status === 'Dalam Perjalanan') {
+                    statusClass = 'status-transit';
+                    statusText = '🚚 Paket Dalam Perjalanan';
+                } else {
+                    statusClass = 'status-process';
+                    statusText = '📦 Paket Dalam Proses';
+                }
+                
+                statusBar.className = 'status-bar ' + statusClass;
+                statusBar.textContent = statusText;
+
+                // Progress bar
+                const progress = data.status === 'Dikirim' ? 100 : 
+                                data.status === 'Dalam Perjalanan' ? 50 : 25;
+                const progressBar = document.createElement('div');
+                progressBar.className = 'progress-bar';
+                progressBar.style.width = progress + '%';
+                statusBar.appendChild(progressBar);
+
+                // Riwayat perjalanan
+                const perjalananList = document.getElementById('perjalananList');
+                perjalananList.innerHTML = '';
+                
+                data.perjalanan.forEach((item, index) => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'perjalanan-item';
+                    if (index === 0) itemDiv.classList.add('active');
+                    
+                    itemDiv.innerHTML = `
+                        <div class="perjalanan-time">${item.waktu}</div>
+                        <div class="perjalanan-desc">${item.keterangan}</div>
+                    `;
+                    perjalananList.appendChild(itemDiv);
+                });
+
+                resultDiv.style.display = 'block';
+                notFoundDiv.style.display = 'none';
+            } else {
+                // Tidak ditemukan
+                resultDiv.style.display = 'none';
+                notFoundDiv.style.display = 'block';
+            }
+        };
+    </script>
+</body>
+</html>

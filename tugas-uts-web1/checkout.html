@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Toko Buku Online</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-brand">Toko Buku Online</h1>
+            <div class="nav-user">
+                <a href="dashboard.html" class="btn btn-secondary">Dashboard</a>
+                <a href="login.html" class="btn btn-logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Checkout Pemesanan</h1>
+        
+        <div class="checkout-container">
+            <div class="checkout-left">
+                <section class="checkout-section">
+                    <h2>Keranjang Belanja</h2>
+                    <div id="keranjangList"></div>
+                    <div class="total-section">
+                        <h3>Total Pembayaran: <span id="totalHarga">Rp 0</span></h3>
+                    </div>
+                </section>
+
+                <section class="checkout-section">
+                    <h2>Informasi Pemesan</h2>
+                    <form id="checkoutForm">
+                        <div class="form-group">
+                            <label for="namaPemesan">Nama Lengkap</label>
+                            <input type="text" id="namaPemesan" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="emailPemesan">Email</label>
+                            <input type="email" id="emailPemesan" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="teleponPemesan">Nomor Telepon</label>
+                            <input type="tel" id="teleponPemesan" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="alamatPemesan">Alamat Pengiriman</label>
+                            <textarea id="alamatPemesan" rows="3" required></textarea>
+                        </div>
+
+                        <h3>Informasi Pembayaran</h3>
+                        <div class="form-group">
+                            <label for="metodePembayaran">Metode Pembayaran</label>
+                            <select id="metodePembayaran" required>
+                                <option value="">Pilih Metode</option>
+                                <option value="transfer">Transfer Bank</option>
+                                <option value="cod">COD (Cash on Delivery)</option>
+                                <option value="ewallet">E-Wallet</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="ekspedisi">Ekspedisi</label>
+                            <select id="ekspedisi" required>
+                                <option value="">Pilih Ekspedisi</option>
+                                <option value="JNE">JNE</option>
+                                <option value="Pos Indonesia">Pos Indonesia</option>
+                                <option value="TIKI">TIKI</option>
+                                <option value="J&T">J&T Express</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-large">Proses Pemesanan</button>
+                    </form>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script>
+        // Cek login
+        if (!localStorage.getItem('currentUser')) {
+            window.location.href = 'login.html';
+        }
+
+        let keranjang = JSON.parse(localStorage.getItem('keranjang') || '[]');
+
+        function formatRupiah(angka) {
+            return 'Rp ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        function hitungTotal() {
+            let total = 0;
+            keranjang.forEach(item => {
+                const harga = parseInt(item.harga.replace(/[^0-9]/g, ''));
+                total += harga * item.jumlah;
+            });
+            return total;
+        }
+
+        function loadKeranjang() {
+            const container = document.getElementById('keranjangList');
+            
+            if (keranjang.length === 0) {
+                container.innerHTML = '<p class="empty-cart">Keranjang masih kosong. <a href="stok.html">Belanja sekarang</a></p>';
+                document.getElementById('totalHarga').textContent = 'Rp 0';
+                return;
+            }
+
+            container.innerHTML = '';
+            keranjang.forEach((item, index) => {
+                const harga = parseInt(item.harga.replace(/[^0-9]/g, ''));
+                const subtotal = harga * item.jumlah;
+                
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'keranjang-item';
+                itemDiv.innerHTML = `
+                    <div class="item-info">
+                        <h4>${item.namaBarang}</h4>
+                        <p>${item.harga} x ${item.jumlah} = ${formatRupiah(subtotal)}</p>
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn btn-sm" onclick="ubahJumlah(${index}, -1)">-</button>
+                        <span>${item.jumlah}</span>
+                        <button class="btn btn-sm" onclick="ubahJumlah(${index}, 1)">+</button>
+                        <button class="btn btn-danger btn-sm" onclick="hapusItem(${index})">Hapus</button>
+                    </div>
+                `;
+                container.appendChild(itemDiv);
+            });
+
+            document.getElementById('totalHarga').textContent = formatRupiah(hitungTotal());
+        }
+
+        function ubahJumlah(index, delta) {
+            keranjang[index].jumlah += delta;
+            if (keranjang[index].jumlah <= 0) {
+                keranjang.splice(index, 1);
+            }
+            localStorage.setItem('keranjang', JSON.stringify(keranjang));
+            loadKeranjang();
+        }
+
+        function hapusItem(index) {
+            if (confirm('Hapus item ini dari keranjang?')) {
+                keranjang.splice(index, 1);
+                localStorage.setItem('keranjang', JSON.stringify(keranjang));
+                loadKeranjang();
+            }
+        }
+
+        document.getElementById('checkoutForm').onsubmit = (e) => {
+            e.preventDefault();
+            
+            if (keranjang.length === 0) {
+                alert('Keranjang masih kosong!');
+                return;
+            }
+
+            const namaPemesan = document.getElementById('namaPemesan').value;
+            const emailPemesan = document.getElementById('emailPemesan').value;
+            const teleponPemesan = document.getElementById('teleponPemesan').value;
+            const alamatPemesan = document.getElementById('alamatPemesan').value;
+            const metodePembayaran = document.getElementById('metodePembayaran').value;
+            const ekspedisi = document.getElementById('ekspedisi').value;
+
+            if (!namaPemesan || !emailPemesan || !teleponPemesan || !alamatPemesan || !metodePembayaran || !ekspedisi) {
+                alert('Mohon lengkapi semua data!');
+                return;
+            }
+
+            // Generate nomor pesanan
+            const nomorPesanan = 'DO' + Date.now();
+            
+            const pesanan = {
+                nomorPesanan,
+                namaPemesan,
+                emailPemesan,
+                teleponPemesan,
+                alamatPemesan,
+                metodePembayaran,
+                ekspedisi,
+                items: keranjang,
+                total: hitungTotal(),
+                tanggal: new Date().toLocaleString('id-ID')
+            };
+
+            // Simpan pesanan
+            let daftarPesanan = JSON.parse(localStorage.getItem('daftarPesanan') || '[]');
+            daftarPesanan.push(pesanan);
+            localStorage.setItem('daftarPesanan', JSON.stringify(daftarPesanan));
+
+            // Kosongkan keranjang
+            localStorage.removeItem('keranjang');
+
+            alert(`Pesanan berhasil diproses!\nNomor Pesanan: ${nomorPesanan}\nTotal: ${formatRupiah(pesanan.total)}`);
+            window.location.href = 'dashboard.html';
+        };
+
+        // Auto-fill data user
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (currentUser) {
+            document.getElementById('namaPemesan').value = currentUser.nama;
+            document.getElementById('emailPemesan').value = currentUser.email;
+        }
+
+        loadKeranjang();
+    </script>
+</body>
+</html>
