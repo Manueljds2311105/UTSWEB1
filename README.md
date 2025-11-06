@@ -1,6 +1,4 @@
-# README — Tugas UTS Pemrograman Web 1
-
-Dokumentasi ini menjelaskan struktur proyek, fungsi file, dan penjelasan fungsi kode utama yang ada di paket `tugas-uts-web1.zip`.
+# Tugas UTS Pemrograman Web 1
 
 > **Catatan:** proyek ini adalah aplikasi frontend sederhana (tanpa backend). Data disimpan sebagai variabel JavaScript pada `js/data.js` dalam bentuk array JSON.
 
@@ -109,36 +107,3 @@ tugas-uts-web1/
 - `validateEmail(email)` — regex sederhana memastikan input mirip alamat email.
 
 ---
-
-## Tips pembacaan kode (bagian yang patut diperhatikan saat review)
-
-1. **Cari `id`/`class` di HTML** — pelajari bagaimana `script.js` memilih elemen (misal: `document.getElementById('catalogTable')`).
-2. **Baca `data.js`** untuk memahami struktur data yang dipakai (field apa saja tiap buku atau tracking entry).
-3. **Ikuti alur event** — temukan `addEventListener` pada tombol-tombol utama: login submit, tambah buku, cari tracking, confirm checkout.
-4. **Perhatikan modularitas** — `script.js` mengandung fungsi-fungsi utilitas yang bisa dipisah jika dikembangkan.
-
----
-
-## Saran pengembangan lanjutan
-
-- Simpan data persistent menggunakan `localStorage` agar perubahan (menambah buku, data checkout) tersimpan antar reload.
-- Pisahkan `script.js` menjadi beberapa modul: `auth.js`, `catalog.js`, `checkout.js`, `tracking.js` untuk maintainability.
-- Tambahkan validasi lebih ketat dan UI feedback non-blocking (toasts atau inline messages) alih-alih `alert()`.
-- Buat tampilan mobile-first dan uji pada beberapa resolusi.
-
----
-
-## Cara menjalankan (untuk dosen / penguji)
-
-1. Ekstrak folder `tugas-uts-web1`.
-2. Buka `login.html` di browser (cukup double-click, tidak perlu server karena semua file statis).
-3. Gunakan kredensial testing (tersedia di `script.js` console log) atau lihat `data.js` untuk daftar akun.
-
----
-
-Jika Anda ingin, saya dapat:
-- Membuat versi `README.md` yang lebih teknis dengan potongan kode (contoh fungsi utama), atau
-- Membuat skrip narasi video singkat berdasarkan README untuk durasi ≤10 menit.
-
-Terima kasih! 🌟
-
