@@ -1,4 +1,10 @@
-# Tugas UTS Pemograman Web 1 
+# UTS Pemograman Web 1
+
+Nama: Manuel Johansen Dolok Saribu
+
+Nim: 312410493
+
+Kelas: Ti.24.a5
 
 **Ringkasan:** aplikasi frontend pemesanan buku. Data dummy ada di `js/data.js`. Interaksi & logika ada di `js/script.js`. CSS di `css/style.css`. Berikut penjelasan singkat tiap file dalam paket `tugas-uts-web1`.
 
