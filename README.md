@@ -57,8 +57,6 @@ tugas-uts-web1/
 
 ## Penjelasan fungsi kode utama (level per‑fungsi)
 
-> Di bawah ini adalah ringkasan fungsi dan alur berpikir ketika menulis fitur — berguna untuk README dan/atau narasi video.
-
 ### 1. Login (di `script.js`)
 - **Alur**:
   1. Tangkap event `submit` pada form dengan `id="loginForm"`.
