@@ -1,4 +1,4 @@
-# README — Tugas UTS Web 1 (Penjelasan ringkas tiap file)
+# Tugas UTS Pemograman Web 1 
 
 **Ringkasan:** aplikasi frontend pemesanan buku. Data dummy ada di `js/data.js`. Interaksi & logika ada di `js/script.js`. CSS di `css/style.css`. Berikut penjelasan singkat tiap file dalam paket `tugas-uts-web1`.
 
